@@ -71,6 +71,7 @@ class _BackgroundPageState extends State<BackgroundPage> {
                 return Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    Image.asset('assets/images/logo.png'),
                     const Text(
                       "Cargando información",
                       textAlign: TextAlign.center,
