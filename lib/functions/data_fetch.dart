@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:mercado_cercano/functions/custom_dialog.dart';
 import 'package:mercado_cercano/functions/geocoding.dart';
 import 'package:mercado_cercano/functions/geolocator.dart';
 import 'package:mercado_cercano/models/market.dart';
@@ -43,16 +45,22 @@ Future<String> getURL(String imageName) async {
       .getDownloadURL();
 }
 
-Future<Position> getPosition() async {
-  return await determinePosition();
+Future<Map<String, dynamic>> getData(
+    BuildContext context, List<String> filter) async {
+  try {
+    Position position = await determinePosition();
+    Map<String, dynamic> location = await getLocationFromCoordinates(position);
+    List<Market> markets = filter.isEmpty
+        ? await getMarkets(location)
+        : await filterMarkets(location, filter);
+
+    return {'position': position, 'location': location, 'markets': markets};
+  } catch (e) {
+    if (context.mounted) customDialog(context);
+    return Future.error(e.toString());
+  }
 }
 
-Future<Map<String, dynamic>> getData(List<String> filter) async {
-  Position position = await getPosition();
-  Map<String, dynamic> location = await getLocationFromCoordinates(position);
-  List<Market> markets = filter.isEmpty
-      ? await getMarkets(location)
-      : await filterMarkets(location, filter);
-
-  return {'position': position, 'location': location, 'markets': markets};
+Future<LocationPermission> checkLocationPermission() {
+  return Geolocator.checkPermission();
 }

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mercado_cercano/functions/data_fetch.dart';
 import 'package:mercado_cercano/functions/market_sort.dart';
-import 'package:mercado_cercano/models/market.dart';
 import 'package:mercado_cercano/pages/filter_page.dart';
 import '../widgets/custom_card.dart';
 
@@ -14,106 +13,131 @@ class BackgroundPage extends StatefulWidget {
 
 class _BackgroundPageState extends State<BackgroundPage> {
   List<String> filter = [];
-  late List<Market> _markets;
+  late Future<Map<String, dynamic>> _data;
+  bool showFilter = false;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _data = getData(context, filter);
+  }
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: Scaffold(
-        floatingActionButton: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            Visibility(
-              visible: filter.isNotEmpty,
-              child: FloatingActionButton(
-                backgroundColor: Colors.red,
-                onPressed: () {
-                  filter.clear();
-                  setState(() {});
-                },
-                child: const Icon(Icons.close),
-              ),
-            ),
-            Visibility(
-              visible: filter.isEmpty,
-              child: FloatingActionButton(
-                backgroundColor: Theme.of(context).primaryColor,
-                onPressed: () async {
-                  filter = (await showModalBottomSheet<List<String>>(
-                    isDismissible: false,
-                    enableDrag: false,
-                    shape: const RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.vertical(top: Radius.circular(40))),
-                    context: context,
-                    builder: (BuildContext context) {
-                      return const FilterPage();
+        child: Scaffold(
+            floatingActionButton: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Visibility(
+                  visible: filter.isNotEmpty,
+                  child: FloatingActionButton(
+                    backgroundColor: Colors.red,
+                    onPressed: () {
+                      showFilter = true;
+                      filter.clear();
+                      _data = getData(context, filter);
+                      setState(() {});
                     },
-                  ))!;
-                  setState(() {});
-                },
-                child: const Icon(
-                  Icons.filter_alt,
-                  color: Colors.white,
+                    child: const Icon(Icons.close),
+                  ),
                 ),
-              ),
+                Visibility(
+                  visible: showFilter,
+                  child: FloatingActionButton(
+                    backgroundColor: Theme.of(context).primaryColor,
+                    onPressed: () async {
+                      filter = (await showModalBottomSheet<List<String>>(
+                        isDismissible: false,
+                        enableDrag: false,
+                        shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.vertical(
+                                top: Radius.circular(40))),
+                        context: context,
+                        builder: (BuildContext context) {
+                          return const FilterPage();
+                        },
+                      ))!;
+                      if (context.mounted) _data = getData(context, filter);
+                      setState(() {});
+                    },
+                    child: const Icon(
+                      Icons.filter_alt,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-        backgroundColor: Theme.of(context).primaryColorLight,
-        body: FutureBuilder<Map<String, dynamic>>(
-            future: getData(filter),
-            builder: (context, snapshot) {
-              if (snapshot.hasError) {
-                return Text('${snapshot.error}');
-              }
-              if (!snapshot.hasData) {
-                return Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Image.asset('assets/images/logo.png'),
-                    const Text(
-                      "Cargando información",
-                      textAlign: TextAlign.center,
+            backgroundColor: Theme.of(context).primaryColorLight,
+            body: NestedScrollView(
+              headerSliverBuilder: (context, innerBoxIsScrolled) {
+                return <Widget>[
+                  const SliverAppBar(
+                    expandedHeight: 200.0,
+                    floating: false,
+                    pinned: false,
+                    flexibleSpace: FlexibleSpaceBar(
+                      centerTitle: true,
+                      title: Text("Mercado cercano",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16.0,
+                          )),
                     ),
-                    SizedBox(
-                      height: 10,
-                      width: MediaQuery.of(context).size.width,
-                    ),
-                    const CircularProgressIndicator(),
-                  ],
-                );
-              }
-              _markets = snapshot.data!['markets'];
-              sortMarkets(_markets, snapshot.data!['position']);
+                  ),
+                ];
+              },
+              body: FutureBuilder<Map<String, dynamic>>(
+                  future: _data,
+                  builder: (context, snapshot) {
+                    if (snapshot.hasError) {
+                      return Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text(
+                            "Ha ocurrido un error",
+                            textAlign: TextAlign.center,
+                          ),
+                          TextButton(
+                              onPressed: () {
+                                _data = getData(context, filter);
+                                setState(() {});
+                              },
+                              child: const Text('Volver a cargar'))
+                        ],
+                      );
+                    }
+                    if (!snapshot.hasData) {
+                      return Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text(
+                            "Cargando información",
+                            textAlign: TextAlign.center,
+                          ),
+                          SizedBox(
+                            height: 10,
+                            width: MediaQuery.of(context).size.width,
+                          ),
+                          const CircularProgressIndicator(),
+                        ],
+                      );
+                    }
+                    sortMarkets(
+                        snapshot.data!['markets'], snapshot.data!['position']);
 
-              return NestedScrollView(
-                  headerSliverBuilder: (context, innerBoxIsScrolled) {
-                    return <Widget>[
-                      const SliverAppBar(
-                        expandedHeight: 200.0,
-                        floating: false,
-                        pinned: false,
-                        flexibleSpace: FlexibleSpaceBar(
-                          centerTitle: true,
-                          title: Text("Mercado cercano",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16.0,
-                              )),
-                        ),
-                      ),
-                    ];
-                  },
-                  body: RefreshIndicator(
+                    return RefreshIndicator(
                       onRefresh: () async {
+                        _data = getData(context, filter);
                         setState(() {});
                       },
                       child: SingleChildScrollView(
                         child: Padding(
                             padding: const EdgeInsets.all(10),
                             child: Column(
-                              children: _markets.isEmpty
+                              children: snapshot.data!['markets'].isEmpty
                                   ? [
                                       SizedBox(
                                         height:
@@ -158,7 +182,7 @@ class _BackgroundPageState extends State<BackgroundPage> {
                                           style: const TextStyle(fontSize: 16),
                                         ),
                                       ),
-                                      ..._markets
+                                      ...snapshot.data!['markets']
                                           .map((e) => FutureBuilder<String>(
                                               future: getURL(e.cover),
                                               builder: (context, snapshot) {
@@ -187,9 +211,9 @@ class _BackgroundPageState extends State<BackgroundPage> {
                                           .toList()
                                     ],
                             )),
-                      )));
-            }),
-      ),
-    );
+                      ),
+                    );
+                  }),
+            )));
   }
 }

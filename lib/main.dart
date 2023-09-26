@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:mercado_cercano/pages/background_page.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:mercado_cercano/pages/home_page.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
           primaryColor: const Color.fromARGB(255, 56, 176, 0),
           primaryColorLight: const Color.fromARGB(255, 237, 237, 233),
           textTheme: GoogleFonts.montserratTextTheme()),
-      home: const BackgroundPage(),
+      home: const HomePage(),
     );
   }
 }
