@@ -76,12 +76,23 @@ class _FilterPageState extends State<FilterPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Padding(
-                padding: EdgeInsets.only(bottom: 10, left: 10, right: 10),
-                child: Text(
-                  "Filtro de mercados",
-                  style: TextStyle(fontSize: 24),
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.only(bottom: 10, left: 10, right: 10),
+                    child: Text(
+                      "Filtro de mercados",
+                      style: TextStyle(fontSize: 24),
+                    ),
+                  ),
+                  IconButton(
+                      onPressed: () {
+                        selected.clear();
+                        Navigator.pop(context, selected);
+                      },
+                      icon: const Icon(Icons.expand_more))
+                ],
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
