@@ -48,6 +48,11 @@ Future<String> getURL(String imageName) async {
 Future<Map<String, dynamic>> getData(
     BuildContext context, List<String> filter) async {
   try {
+    bool locationServices = await Geolocator.isLocationServiceEnabled();
+    if (!locationServices) {
+      if (context.mounted) customDialog(context);
+      return Future.error({'locationEnabled': false});
+    }
     Position position = await determinePosition();
     Map<String, dynamic> location = await getLocationFromCoordinates(position);
     List<Market> markets = filter.isEmpty
@@ -59,8 +64,4 @@ Future<Map<String, dynamic>> getData(
     if (context.mounted) customDialog(context);
     return Future.error(e.toString());
   }
-}
-
-Future<LocationPermission> checkLocationPermission() {
-  return Geolocator.checkPermission();
 }

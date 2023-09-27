@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:mercado_cercano/functions/data_fetch.dart';
 import 'package:mercado_cercano/pages/background_page.dart';
 
@@ -11,78 +10,27 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  late Future<LocationPermission> _serviceEnabled;
+  late Future<Map<String, dynamic>> _data;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    _serviceEnabled = checkLocationPermission();
+    _data = getData(context, []);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: FutureBuilder<LocationPermission>(
-          future: _serviceEnabled,
+      body: FutureBuilder<Map<String, dynamic>>(
+          future: _data,
           builder: (context, snapshot) {
+            List<Widget> children = [Container()];
             if (snapshot.hasError) {
-              return Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Image.asset('assets/images/logo.png'),
-                  const Text(
-                    "La aplicación no pudo iniciarse correctamente",
-                    textAlign: TextAlign.center,
-                  ),
-                  SizedBox(
-                    height: 10,
-                    width: MediaQuery.of(context).size.width,
-                  ),
-                  TextButton(
-                      onPressed: () {
-                        _serviceEnabled = checkLocationPermission();
-                        setState(() {});
-                      },
-                      child: const Text('Volver a intentar'))
-                ],
-              );
-            }
-            if (!snapshot.hasData) {
-              return Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Image.asset('assets/images/logo.png'),
-                  const Text(
-                    "Cargando información",
-                    textAlign: TextAlign.center,
-                  ),
-                  SizedBox(
-                    height: 10,
-                    width: MediaQuery.of(context).size.width,
-                  ),
-                  const CircularProgressIndicator(),
-                ],
-              );
-            }
-
-            if (snapshot.data! != LocationPermission.denied &&
-                snapshot.data! != LocationPermission.deniedForever) {
-              WidgetsBinding.instance.addPostFrameCallback((_) =>
-                  Navigator.pushReplacement(context,
-                      MaterialPageRoute(builder: (context) {
-                    return const BackgroundPage();
-                  })));
-
-              return const Text('Servicios habilitados');
-            }
-
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
+              children = [
                 Image.asset('assets/images/logo.png'),
                 const Text(
-                  "Servicios de ubicación no habilitados",
+                  "La aplicación no pudo iniciarse correctamente",
                   textAlign: TextAlign.center,
                 ),
                 SizedBox(
@@ -90,14 +38,44 @@ class _HomePageState extends State<HomePage> {
                   width: MediaQuery.of(context).size.width,
                 ),
                 TextButton(
-                    onPressed: () {
-                      _serviceEnabled = checkLocationPermission();
-                      setState(() {});
-                    },
+                    onPressed: handleRefresh,
                     child: const Text('Volver a cargar'))
-              ],
+              ];
+            }
+            if (!snapshot.hasData) {
+              children = [
+                Image.asset('assets/images/logo.png'),
+                const Text(
+                  "Cargando información",
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(
+                  height: 10,
+                  width: MediaQuery.of(context).size.width,
+                ),
+                const CircularProgressIndicator(),
+              ];
+            }
+            if (snapshot.hasData) {
+              WidgetsBinding.instance.addPostFrameCallback((_) =>
+                  Navigator.pushReplacement(context,
+                      MaterialPageRoute(builder: (context) {
+                    return BackgroundPage(
+                      initialData: snapshot.data!,
+                    );
+                  })));
+            }
+
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: children,
             );
           }),
     );
+  }
+
+  handleRefresh() {
+    getData(context, []);
+    setState(() {});
   }
 }

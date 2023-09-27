@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 
 Future<void> customDialog(BuildContext context) async {
   return showDialog(
@@ -8,7 +7,7 @@ Future<void> customDialog(BuildContext context) async {
       return AlertDialog(
         title: const Text('Permisos de ubicacion desactivados'),
         content: const Text(
-          'Para el funcionamiento de esta aplicación es necesario que actives los permisos de ubicación de tu dispositivo.',
+          'Para el funcionamiento de esta aplicación es necesario que actives los servicios de ubicación de tu dispositivo.',
           textAlign: TextAlign.justify,
         ),
         actions: <Widget>[
@@ -16,9 +15,8 @@ Future<void> customDialog(BuildContext context) async {
             style: TextButton.styleFrom(
               textStyle: Theme.of(context).textTheme.labelLarge,
             ),
-            child: const Text('Abrir configuración'),
-            onPressed: () async {
-              Geolocator.openLocationSettings();
+            child: const Text('Aceptar'),
+            onPressed: () {
               Navigator.of(context).pop();
             },
           ),

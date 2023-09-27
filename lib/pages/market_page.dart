@@ -5,10 +5,10 @@ import 'package:mercado_cercano/models/market.dart';
 import 'package:mercado_cercano/pages/map_page.dart';
 
 class MarketPage extends StatelessWidget {
-  const MarketPage({super.key, required this.market, required this.image});
+  const MarketPage({super.key, required this.market, required this.header});
 
   final Market market;
-  final ImageProvider image;
+  final Widget header;
 
   @override
   Widget build(BuildContext context) {
@@ -27,17 +27,11 @@ class MarketPage extends StatelessWidget {
                   topLeft: Radius.circular(10), topRight: Radius.circular(10))),
           child: Column(children: [
             ClipRRect(
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(10),
-                topRight: Radius.circular(10),
-              ),
-              child: Image(
-                image: image,
-                height: 200,
-                width: MediaQuery.of(context).size.width,
-                fit: BoxFit.fill,
-              ),
-            ),
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(10),
+                  topRight: Radius.circular(10),
+                ),
+                child: header),
             const SizedBox(
               height: 10,
             ),
