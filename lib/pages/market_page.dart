@@ -217,7 +217,9 @@ class MarketPage extends StatelessWidget {
                               return const Center(
                                   child: CircularProgressIndicator());
                             }
-                            ImageProvider imagen = NetworkImage(snapshot.data!);
+                            ImageProvider imagen = NetworkImage(
+                              snapshot.data!,
+                            );
                             return InkWell(
                               onTap: (() {
                                 Navigator.push(
@@ -230,9 +232,27 @@ class MarketPage extends StatelessWidget {
                               }),
                               child: Padding(
                                 padding: const EdgeInsets.all(8.0),
-                                child: Image(
-                                  image: imagen,
-                                  fit: BoxFit.cover,
+                                child: Image.network(
+                                  snapshot.data!,
+                                  loadingBuilder:
+                                      ((context, child, loadingProgress) {
+                                    if (loadingProgress == null) {
+                                      return child;
+                                    }
+                                    return Center(
+                                      child: CircularProgressIndicator(
+                                        value: loadingProgress
+                                                    .expectedTotalBytes !=
+                                                null
+                                            ? loadingProgress
+                                                    .cumulativeBytesLoaded /
+                                                loadingProgress
+                                                    .expectedTotalBytes!
+                                            : null,
+                                      ),
+                                    );
+                                  }),
+                                  fit: BoxFit.fill,
                                 ),
                               ),
                             );

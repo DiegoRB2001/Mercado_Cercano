@@ -14,11 +14,11 @@ class BackgroundPage extends StatefulWidget {
 
 class _BackgroundPageState extends State<BackgroundPage> {
   List<String> filter = [];
+  Widget header = const CircularProgressIndicator();
   late Future<Map<String, dynamic>> _data;
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _data = Future.value(widget.initialData);
   }
@@ -212,9 +212,39 @@ class _BackgroundPageState extends State<BackgroundPage> {
                                                 }
                                                 if (snapshot.hasData) {
                                                   ignoring = false;
-                                                  header = Image(
-                                                    image: NetworkImage(
-                                                        snapshot.data!),
+                                                  header = Image.network(
+                                                    loadingBuilder: ((context,
+                                                        child,
+                                                        loadingProgress) {
+                                                      if (loadingProgress ==
+                                                          null) {
+                                                        return child;
+                                                      }
+                                                      return FittedBox(
+                                                        fit: BoxFit.fill,
+                                                        child: SizedBox(
+                                                          height: 200,
+                                                          width: MediaQuery.of(
+                                                                  context)
+                                                              .size
+                                                              .width,
+                                                          child: Center(
+                                                            child:
+                                                                CircularProgressIndicator(
+                                                              value: loadingProgress
+                                                                          .expectedTotalBytes !=
+                                                                      null
+                                                                  ? loadingProgress
+                                                                          .cumulativeBytesLoaded /
+                                                                      loadingProgress
+                                                                          .expectedTotalBytes!
+                                                                  : null,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      );
+                                                    }),
+                                                    snapshot.data!,
                                                     height: 200,
                                                     width:
                                                         MediaQuery.of(context)
