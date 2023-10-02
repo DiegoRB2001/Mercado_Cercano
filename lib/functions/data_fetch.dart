@@ -39,10 +39,14 @@ Future<Market> getMarket(String id) => FirebaseFirestore.instance
         .first);
 
 Future<String> getURL(String imageName) async {
-  return await FirebaseStorage.instance
-      .ref()
-      .child("images/$imageName")
-      .getDownloadURL();
+  try {
+    return await FirebaseStorage.instance
+        .ref()
+        .child("images/$imageName")
+        .getDownloadURL();
+  } on Exception catch (e) {
+    return Future.error(e.toString());
+  }
 }
 
 Future<Map<String, dynamic>> getData(
@@ -61,7 +65,6 @@ Future<Map<String, dynamic>> getData(
 
     return {'position': position, 'location': location, 'markets': markets};
   } catch (e) {
-    if (context.mounted) customDialog(context);
     return Future.error(e.toString());
   }
 }

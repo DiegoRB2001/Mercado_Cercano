@@ -70,64 +70,101 @@ class _BackgroundPageState extends State<BackgroundPage> {
               ],
             ),
             backgroundColor: Theme.of(context).primaryColorLight,
-            body: NestedScrollView(
-              headerSliverBuilder: (context, innerBoxIsScrolled) {
-                return <Widget>[
-                  const SliverAppBar(
-                    expandedHeight: 200.0,
-                    floating: false,
-                    pinned: false,
-                    flexibleSpace: FlexibleSpaceBar(
-                      centerTitle: true,
-                      title: Text("Mercado cercano",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16.0,
-                          )),
-                    ),
-                  ),
-                ];
-              },
-              body: FutureBuilder<Map<String, dynamic>>(
-                  future: _data,
-                  builder: (context, snapshot) {
-                    if (snapshot.hasError) {
-                      return Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text(
-                            "Ha ocurrido un error",
-                            textAlign: TextAlign.center,
-                          ),
-                          TextButton(
-                              onPressed: () {
-                                _data = getData(context, filter);
-                                setState(() {});
-                              },
-                              child: const Text('Volver a cargar'))
-                        ],
-                      );
-                    }
-                    if (!snapshot.hasData) {
-                      return Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text(
-                            "Cargando información",
-                            textAlign: TextAlign.center,
-                          ),
-                          SizedBox(
-                            height: 10,
-                            width: MediaQuery.of(context).size.width,
-                          ),
-                          const CircularProgressIndicator(),
-                        ],
-                      );
-                    }
+            body: FutureBuilder<Map<String, dynamic>>(
+                future: _data,
+                builder: (context, snapshot) {
+                  Widget header = const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                  Widget content = Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text(
+                        "Cargando información",
+                        textAlign: TextAlign.center,
+                      ),
+                      SizedBox(
+                        height: 10,
+                        width: MediaQuery.of(context).size.width,
+                      ),
+                      const CircularProgressIndicator(),
+                    ],
+                  );
+                  if (snapshot.hasError) {
+                    header = const Center(
+                      child: Text('Se ha producido un error.'),
+                    );
+                    content = Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text(
+                          "Ha ocurrido un error",
+                          textAlign: TextAlign.center,
+                        ),
+                        TextButton(
+                            onPressed: () {
+                              _data = getData(context, filter);
+                              setState(() {});
+                            },
+                            child: const Text('Volver a cargar'))
+                      ],
+                    );
+                  }
+                  if (snapshot.hasData) {
+                    String cityName = snapshot.data!['location']['city']
+                        .toString()
+                        .replaceAll(' ', '_');
+                    header = FutureBuilder(
+                        future: getURL('$cityName.jpg'),
+                        builder: (context, snapshot) {
+                          if (snapshot.hasError) {
+                            return const Center(
+                              child: Text('Se ha producido un error.'),
+                            );
+                          }
+                          if (!snapshot.hasData) {
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          }
+                          return Image.network(snapshot.data!, fit: BoxFit.fill,
+                              loadingBuilder:
+                                  (context, child, loadingProgress) {
+                            if (loadingProgress == null) {
+                              return child;
+                            }
+                            return Center(
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                value: loadingProgress.expectedTotalBytes !=
+                                        null
+                                    ? loadingProgress.cumulativeBytesLoaded /
+                                        loadingProgress.expectedTotalBytes!
+                                    : null,
+                              ),
+                            );
+                          });
+                        });
                     sortMarkets(
                         snapshot.data!['markets'], snapshot.data!['position']);
-
-                    return RefreshIndicator(
+                    List<Widget> listHeader = [
+                      const Text(
+                        'Mostrando mercados de: ',
+                        style: TextStyle(fontSize: 20),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: Text(
+                          '${snapshot.data!['location']['city']}, ${snapshot.data!['location']['state']}',
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.only(left: 20, right: 20),
+                        child: Divider(color: Colors.black),
+                      ),
+                    ];
+                    content = RefreshIndicator(
                       onRefresh: () async {
                         _data = getData(context, filter);
                         setState(() {});
@@ -143,19 +180,7 @@ class _BackgroundPageState extends State<BackgroundPage> {
                                             MediaQuery.of(context).size.height,
                                         child: Column(
                                           children: [
-                                            const Text(
-                                              'Mostrando mercados de: ',
-                                              style: TextStyle(fontSize: 20),
-                                            ),
-                                            Padding(
-                                              padding:
-                                                  const EdgeInsets.only(top: 8),
-                                              child: Text(
-                                                '${snapshot.data!['location']['city']}, ${snapshot.data!['location']['state']}',
-                                                style: const TextStyle(
-                                                    fontSize: 16),
-                                              ),
-                                            ),
+                                            ...listHeader,
                                             const Expanded(
                                               child: Center(
                                                 child: Text(
@@ -170,22 +195,7 @@ class _BackgroundPageState extends State<BackgroundPage> {
                                       ),
                                     ]
                                   : [
-                                      const Text(
-                                        'Mostrando mercados de: ',
-                                        style: TextStyle(fontSize: 20),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.only(top: 8),
-                                        child: Text(
-                                          '${snapshot.data!['location']['city']}, ${snapshot.data!['location']['state']}',
-                                          style: const TextStyle(fontSize: 16),
-                                        ),
-                                      ),
-                                      const Padding(
-                                        padding: EdgeInsets.only(
-                                            left: 20, right: 20),
-                                        child: Divider(color: Colors.black),
-                                      ),
+                                      ...listHeader,
                                       ...snapshot.data!['markets']
                                           .map((e) => FutureBuilder<String>(
                                               future: getURL(e.cover),
@@ -269,7 +279,28 @@ class _BackgroundPageState extends State<BackgroundPage> {
                             )),
                       ),
                     );
-                  }),
-            )));
+                  }
+                  return NestedScrollView(
+                    headerSliverBuilder: (context, innerBoxIsScrolled) {
+                      return <Widget>[
+                        SliverAppBar(
+                          expandedHeight: 200.0,
+                          floating: false,
+                          pinned: false,
+                          flexibleSpace: FlexibleSpaceBar(
+                            background: header,
+                            centerTitle: true,
+                            title: const Text("Mercado cercano",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16.0,
+                                )),
+                          ),
+                        ),
+                      ];
+                    },
+                    body: content,
+                  );
+                })));
   }
 }

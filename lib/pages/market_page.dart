@@ -226,7 +226,12 @@ class MarketPage extends StatelessWidget {
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) => SizedBox(
-                                        child: PhotoView(imageProvider: imagen),
+                                        child: Scaffold(
+                                            appBar: AppBar(
+                                              backgroundColor: Colors.black,
+                                            ),
+                                            body: PhotoView(
+                                                imageProvider: imagen)),
                                       ),
                                     ));
                               }),

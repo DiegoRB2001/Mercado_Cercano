@@ -25,22 +25,7 @@ class _HomePageState extends State<HomePage> {
           future: _data,
           builder: (context, snapshot) {
             List<Widget> children = [Container()];
-            if (snapshot.hasError) {
-              children = [
-                Image.asset('assets/images/logo.png'),
-                const Text(
-                  "La aplicación no pudo iniciarse correctamente",
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(
-                  height: 10,
-                  width: MediaQuery.of(context).size.width,
-                ),
-                TextButton(
-                    onPressed: handleRefresh,
-                    child: const Text('Volver a cargar'))
-              ];
-            }
+
             if (!snapshot.hasData) {
               children = [
                 Image.asset('assets/images/logo.png'),
@@ -55,7 +40,27 @@ class _HomePageState extends State<HomePage> {
                 const CircularProgressIndicator(),
               ];
             }
-            if (snapshot.hasData) {
+
+            if (snapshot.hasError) {
+              children = [
+                Image.asset('assets/images/logo.png'),
+                const Text(
+                  "La aplicación no pudo iniciarse correctamente",
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(
+                  height: 10,
+                  width: MediaQuery.of(context).size.width,
+                ),
+                TextButton(
+                    onPressed: () {
+                      _data = getData(context, []);
+
+                      setState(() {});
+                    },
+                    child: const Text('Volver a cargar'))
+              ];
+            } else if (snapshot.hasData) {
               WidgetsBinding.instance.addPostFrameCallback((_) =>
                   Navigator.pushReplacement(context,
                       MaterialPageRoute(builder: (context) {
@@ -71,10 +76,5 @@ class _HomePageState extends State<HomePage> {
             );
           }),
     );
-  }
-
-  handleRefresh() {
-    getData(context, []);
-    setState(() {});
   }
 }
