@@ -61,6 +61,7 @@ class FilterPage extends StatefulWidget {
 
 class _FilterPageState extends State<FilterPage> {
   List<String> selected = [];
+  List<String> searchItems = productList;
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +73,7 @@ class _FilterPageState extends State<FilterPage> {
             borderRadius:
                 const BorderRadius.vertical(top: Radius.circular(40))),
         child: SizedBox(
-          height: 300,
+          height: 400,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -94,38 +95,101 @@ class _FilterPageState extends State<FilterPage> {
                       icon: const Icon(Icons.expand_more))
                 ],
               ),
+              SearchAnchor(
+                isFullScreen: false,
+                builder: (context, controller) {
+                  return Padding(
+                    padding: const EdgeInsets.only(left: 10, right: 10),
+                    child: SearchBar(
+                      hintText: 'Busca algún producto',
+                      controller: controller,
+                      onTap: () {
+                        controller.openView();
+                      },
+                      onChanged: (value) {
+                        controller.openView();
+                        setState(() {
+                          searchItems.removeWhere((element) => !element
+                              .toLowerCase()
+                              .contains(value.toLowerCase()));
+                        });
+                        print('ola');
+                      },
+                    ),
+                  );
+                },
+                suggestionsBuilder: (context, controller) {
+                  return List<ListTile>.generate(
+                      searchItems.length,
+                      (index) => ListTile(
+                            title: Text(searchItems[index]),
+                            onTap: () {
+                              setState(() {
+                                selected.add(searchItems[index]);
+                                controller.closeView(searchItems[index]);
+                              });
+                            },
+                          ));
+                },
+              ),
+              const SizedBox(
+                height: 10,
+              ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                        color: Theme.of(context).primaryColor,
+                  Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Container(
+                      decoration: BoxDecoration(
                         borderRadius:
-                            const BorderRadius.all(Radius.circular(10))),
-                    child: DropdownButton<String>(
-                      hint: const Text(
-                        "Selecciona un producto",
-                        style: TextStyle(color: Colors.white),
+                            const BorderRadius.all(Radius.circular(10)),
+                        color: Theme.of(context).primaryColorLight,
                       ),
-                      style: const TextStyle(color: Colors.black),
-                      items: productList
-                          .map<DropdownMenuItem<String>>(
-                              (e) => DropdownMenuItem<String>(
-                                    value: e,
-                                    child: Text(
-                                      e,
-                                      textAlign: TextAlign.center,
+                      width: MediaQuery.of(context).size.width - 100,
+                      alignment: Alignment.center,
+                      height: 50,
+                      child: ListView(
+                        shrinkWrap: true,
+                        scrollDirection: Axis.horizontal,
+                        children: selected
+                            .map((producto) => Container(
+                                  constraints: const BoxConstraints(
+                                      minWidth: 50, minHeight: 40),
+                                  margin: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                      color: Theme.of(context).primaryColor,
+                                      borderRadius: BorderRadius.circular(50)),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(5),
+                                    child: Row(
+                                      children: [
+                                        Text(
+                                          producto,
+                                          textAlign: TextAlign.center,
+                                          style: const TextStyle(
+                                              color: Colors.white),
+                                        ),
+                                        InkWell(
+                                          child: const Icon(
+                                            Icons.close,
+                                            size: 20,
+                                            weight: 300,
+                                            color: Colors.white,
+                                          ),
+                                          onTap: () {
+                                            setState(() {
+                                              selected.removeWhere((element) =>
+                                                  element == producto);
+                                            });
+                                          },
+                                        )
+                                      ],
                                     ),
-                                  ))
-                          .toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          if (!selected.contains(value)) {
-                            selected.add(value!);
-                          }
-                        });
-                      },
+                                  ),
+                                ))
+                            .toList(),
+                      ),
                     ),
                   ),
                   IconButton(
@@ -136,62 +200,6 @@ class _FilterPageState extends State<FilterPage> {
                       },
                       icon: const Icon(Icons.close))
                 ],
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.all(Radius.circular(10)),
-                    color: Theme.of(context).primaryColorLight,
-                  ),
-                  width: double.infinity,
-                  alignment: Alignment.center,
-                  height: 50,
-                  child: ListView(
-                    shrinkWrap: true,
-                    scrollDirection: Axis.horizontal,
-                    children: selected
-                        .map((producto) => Container(
-                              constraints: const BoxConstraints(
-                                  minWidth: 50, minHeight: 40),
-                              margin: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                  color: Theme.of(context).primaryColor,
-                                  borderRadius: BorderRadius.circular(50)),
-                              child: Padding(
-                                padding: const EdgeInsets.all(5),
-                                child: Row(
-                                  children: [
-                                    Text(
-                                      producto,
-                                      textAlign: TextAlign.center,
-                                      style:
-                                          const TextStyle(color: Colors.white),
-                                    ),
-                                    InkWell(
-                                      child: const Icon(
-                                        Icons.close,
-                                        size: 20,
-                                        weight: 300,
-                                        color: Colors.white,
-                                      ),
-                                      onTap: () {
-                                        setState(() {
-                                          selected.removeWhere(
-                                              (element) => element == producto);
-                                        });
-                                      },
-                                    )
-                                  ],
-                                ),
-                              ),
-                            ))
-                        .toList(),
-                  ),
-                ),
               ),
               const SizedBox(
                 height: 10,

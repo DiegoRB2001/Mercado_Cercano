@@ -1,4 +1,4 @@
-package com.example.mercado_cercano
+package com.mercado_cercano
 
 import io.flutter.embedding.android.FlutterActivity
 
