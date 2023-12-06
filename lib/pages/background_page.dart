@@ -115,7 +115,7 @@ class _BackgroundPageState extends State<BackgroundPage> {
                         .toString()
                         .replaceAll(' ', '_');
                     header = FutureBuilder(
-                        future: getURL('$cityName.jpg'),
+                        future: getURL('cities/$cityName.jpg'),
                         builder: (context, snapshot) {
                           if (snapshot.hasError) {
                             return const Center(
@@ -197,83 +197,22 @@ class _BackgroundPageState extends State<BackgroundPage> {
                                   : [
                                       ...listHeader,
                                       ...snapshot.data!['markets']
-                                          .map((e) => FutureBuilder<String>(
-                                              future: getURL(e.cover),
-                                              builder: (context, snapshot) {
-                                                Widget header = Container();
-                                                bool ignoring = true;
-                                                if (!snapshot.hasData) {
-                                                  ignoring = true;
-                                                  header = const Padding(
-                                                    padding: EdgeInsets.all(8),
-                                                    child: SizedBox(
-                                                        height: 200,
-                                                        child: Center(
-                                                            child:
-                                                                CircularProgressIndicator())),
-                                                  );
-                                                }
-                                                if (snapshot.hasError) {
-                                                  ignoring = true;
-                                                  header = const Center(
-                                                    child: Text(
-                                                        'Ha ocurrido un error'),
-                                                  );
-                                                }
-                                                if (snapshot.hasData) {
-                                                  ignoring = false;
-                                                  header = Image.network(
-                                                    loadingBuilder: ((context,
-                                                        child,
-                                                        loadingProgress) {
-                                                      if (loadingProgress ==
-                                                          null) {
-                                                        return child;
-                                                      }
-                                                      return FittedBox(
-                                                        fit: BoxFit.fill,
-                                                        child: SizedBox(
-                                                          height: 200,
-                                                          width: MediaQuery.of(
-                                                                  context)
-                                                              .size
-                                                              .width,
-                                                          child: Center(
-                                                            child:
-                                                                CircularProgressIndicator(
-                                                              value: loadingProgress
-                                                                          .expectedTotalBytes !=
-                                                                      null
-                                                                  ? loadingProgress
-                                                                          .cumulativeBytesLoaded /
-                                                                      loadingProgress
-                                                                          .expectedTotalBytes!
-                                                                  : null,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      );
-                                                    }),
-                                                    snapshot.data!,
+                                          .map((e) => Padding(
+                                                padding: const EdgeInsets.only(
+                                                    top: 10, bottom: 10),
+                                                child: CustomCard(
+                                                  header: Image.network(
+                                                    e.cover,
                                                     height: 200,
                                                     width:
                                                         MediaQuery.of(context)
                                                             .size
                                                             .width,
                                                     fit: BoxFit.fill,
-                                                  );
-                                                }
-                                                return Padding(
-                                                  padding:
-                                                      const EdgeInsets.only(
-                                                          top: 10, bottom: 10),
-                                                  child: CustomCard(
-                                                    ignoring: ignoring,
-                                                    header: header,
-                                                    market: e,
                                                   ),
-                                                );
-                                              }))
+                                                  market: e,
+                                                ),
+                                              ))
                                           .toList()
                                     ],
                             )),

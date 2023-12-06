@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Market {
-  final String id;
   final String name;
   final String address;
   final String schedule;
@@ -14,8 +13,7 @@ class Market {
   final List images;
 
   const Market(
-      {required this.id,
-      required this.name,
+      {required this.name,
       required this.address,
       required this.schedule,
       required this.phone,
@@ -28,7 +26,6 @@ class Market {
 
   factory Market.fromJson(Map<String, dynamic> json) {
     return Market(
-        id: json['id'],
         name: json['name'],
         address: json['address'],
         schedule: json['schedule'],

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
-import 'package:mercado_cercano/functions/data_fetch.dart';
 import 'package:mercado_cercano/models/market.dart';
 import 'package:mercado_cercano/pages/map_page.dart';
 
@@ -207,61 +206,49 @@ class MarketPage extends StatelessWidget {
                   shrinkWrap: true,
                   crossAxisCount: 2,
                   children: market.images
-                      .map((e) => FutureBuilder(
-                          future: getURL(e),
-                          builder: (context, snapshot) {
-                            if (snapshot.hasError) {
-                              return Text('${snapshot.error}');
-                            }
-                            if (!snapshot.hasData) {
-                              return const Center(
-                                  child: CircularProgressIndicator());
-                            }
-                            ImageProvider imagen = NetworkImage(
-                              snapshot.data!,
-                            );
-                            return InkWell(
-                              onTap: (() {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => SizedBox(
-                                        child: Scaffold(
-                                            appBar: AppBar(
-                                              backgroundColor: Colors.black,
-                                            ),
-                                            body: PhotoView(
-                                                imageProvider: imagen)),
-                                      ),
-                                    ));
-                              }),
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Image.network(
-                                  snapshot.data!,
-                                  loadingBuilder:
-                                      ((context, child, loadingProgress) {
-                                    if (loadingProgress == null) {
-                                      return child;
-                                    }
-                                    return Center(
-                                      child: CircularProgressIndicator(
-                                        value: loadingProgress
-                                                    .expectedTotalBytes !=
-                                                null
-                                            ? loadingProgress
-                                                    .cumulativeBytesLoaded /
-                                                loadingProgress
-                                                    .expectedTotalBytes!
-                                            : null,
-                                      ),
-                                    );
-                                  }),
-                                  fit: BoxFit.fill,
-                                ),
+                      .map((e) => InkWell(
+                            onTap: (() {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => SizedBox(
+                                      child: Scaffold(
+                                          appBar: AppBar(
+                                            backgroundColor: Colors.black,
+                                          ),
+                                          body: PhotoView(
+                                              imageProvider: NetworkImage(
+                                            e,
+                                          ))),
+                                    ),
+                                  ));
+                            }),
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Image.network(
+                                e,
+                                loadingBuilder:
+                                    ((context, child, loadingProgress) {
+                                  if (loadingProgress == null) {
+                                    return child;
+                                  }
+                                  return Center(
+                                    child: CircularProgressIndicator(
+                                      value:
+                                          loadingProgress.expectedTotalBytes !=
+                                                  null
+                                              ? loadingProgress
+                                                      .cumulativeBytesLoaded /
+                                                  loadingProgress
+                                                      .expectedTotalBytes!
+                                              : null,
+                                    ),
+                                  );
+                                }),
+                                fit: BoxFit.fill,
                               ),
-                            );
-                          }))
+                            ),
+                          ))
                       .toList()),
             ),
           ]),
